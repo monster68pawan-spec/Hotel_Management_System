@@ -1,0 +1,336 @@
+HOTEL MANAGEMENT SYSTEM - PROJECT EXPLANATION
+============================================
+
+WHAT THIS PROJECT DOES
+----------------------
+This is a small, local hotel front-desk application. A staff member can sign
+in, manage guests and rooms, make reservations, record check-in and check-out,
+and create a room-charge bill after checkout. The app uses a desktop window
+made with Python Tkinter and saves records in a local SQLite database.
+
+HOW TO START THE APPLICATION
+----------------------------
+Run this command from the project folder:
+
+    python main.py
+
+The application workflow is:
+
+1. main.py is the starting point. It creates the database connection and
+   initializes the database tables.
+2. main.py opens the main Tkinter window by creating HotelApp in hotel/ui.py.
+3. The app checks whether an administrator account exists. On the first run,
+   the user creates one; on later runs, the user signs in.
+4. hotel/auth.py checks account details. After successful setup or sign-in,
+   hotel/ui.py shows the dashboard and its tabs.
+5. The user works with Guests, Rooms, Reservations, and Billing. Each screen
+   gets information from its matching service module.
+6. The service modules check business rules and use hotel/database.py to read
+   or save records in the SQLite file.
+7. The window stays open until the user closes it. Tkinter handles the screen
+   events, such as button clicks and tab changes.
+
+The Python files are not run in a simple one-after-another list. main.py is
+the entry point; it imports the other modules when the program starts. The
+screen and service files then work together as the user chooses actions.
+
+WHY THERE ARE DIFFERENT FILES
+-----------------------------
+The project separates the visible screens, hotel rules, data storage, and
+automated tests. This makes it easier to understand and change one part
+without putting the whole application in one large file.
+
+For example, Billing is divided into three roles:
+
+- hotel/billing_screen.py displays the Billing tab and responds to button
+  clicks. It is the user-interface part.
+- hotel/billing.py checks whether a reservation has been checked out,
+  calculates the room charge, and saves or retrieves the bill. It is the
+  billing-rules and data-operation part.
+- tests/test_billing.py checks that billing works, including the rule that
+  bills can only be generated after checkout and the total is rate times
+  nights. It is a test file, not part of the normal screen workflow.
+
+The same separation is used for guests, rooms, and reservations.
+
+IMPORTANT APPLICATION FILES
+---------------------------
+
+main.py
+  The program's starting file. It prepares the database, creates the Tkinter
+  window, starts the application, and keeps the window running.
+
+hotel/__init__.py
+  Marks the hotel folder as a Python package so its modules can import one
+  another using names such as hotel.database.
+
+hotel/database.py
+  Defines the database tables and the Database helper. It creates and opens
+  the SQLite database, enables database relationships, and can create a
+  protected backup.
+
+hotel/ui.py
+  Controls the overall app window, first-run setup and sign-in screens,
+  dashboard, navigation tabs, overview figures, and the data-backup action.
+  It connects the screens to their service modules.
+
+hotel/auth.py
+  Applies the account rules: administrator creation, password hashing, and
+  sign-in verification. It does not display the login screen; hotel/ui.py
+  displays it.
+
+hotel/customers.py
+  Applies guest-record rules such as validating names and contact information,
+  searching, saving, updating, and deleting guest records.
+
+hotel/customer_screen.py
+  Displays the Guests screen and connects its form, search, table, and buttons
+  to hotel/customers.py.
+
+hotel/rooms.py
+  Applies room rules, including room details, nightly rates, searches, and
+  checking whether a room is available for the requested dates.
+
+hotel/room_screen.py
+  Displays the Rooms screen and connects its form and availability search to
+  hotel/rooms.py.
+
+hotel/bookings.py
+  Applies reservation rules: valid dates, guest and room checks, preventing
+  overlapping stays, editing or deleting eligible reservations, and
+  check-in/check-out/cancellation status changes.
+
+hotel/booking_screen.py
+  Displays the Reservations screen and connects the reservation form,
+  available guest/room choices, list, and check-in/check-out actions to the
+  booking, customer, and room service modules.
+
+hotel/billing.py
+  Applies billing rules. It only generates a bill for a checked-out stay,
+  calculates the total using the reserved nightly rate and number of nights,
+  and saves or retrieves the bill.
+
+hotel/billing_screen.py
+  Displays the Billing screen, lets the user choose a checked-out reservation,
+  and shows generated or saved bills using hotel/billing.py.
+
+hotel/widgets.py
+  Holds small display helpers shared by screens, such as table creation,
+  common colours/styles, and formatting money amounts.
+
+DATABASE AND SAVED INFORMATION
+------------------------------
+data/hotel.sqlite3
+  The local SQLite database created when the application is run. It stores
+  administrator, guest, room, reservation, and bill records. It is application
+  data, not Python source code. It contains sensitive hotel information, so
+  protect it and its backups.
+
+TEST FILES
+----------
+Tests are run separately with:
+
+    python -m unittest discover -s tests -v
+
+Each test file focuses on one part:
+
+tests/test_database.py
+  Checks table creation, database relationships, and database backup behavior.
+
+tests/test_auth.py
+  Checks administrator creation, password hashing, and sign-in behavior.
+
+tests/test_customers.py
+  Checks guest record creation, search, update, deletion, and input validation.
+
+tests/test_rooms.py
+  Checks room records, nightly rates, and date-based room availability.
+
+tests/test_bookings.py
+  Checks reservation creation, date conflicts, edits, deletion, and status
+  changes such as check-in and checkout.
+
+tests/test_billing.py
+  Checks that bills require checkout, that the bill total is correct, and that
+  a generated bill can be retrieved.
+
+Tests use temporary databases so their sample records do not go into the
+hotel's normal data file. Tests help catch mistakes after code is changed.
+
+PROJECT DOCUMENTATION
+---------------------
+README.md
+  Quick instructions for running the app, its front-desk workflow, and its
+  current limits.
+
+capability-map.md
+  A summary of the main features, what each feature depends on, and the
+  intended order for building the features.
+
+SPEC-identity.md
+  Requirements and limits for administrator login.
+
+SPEC-customers.md
+  Requirements and limits for guest records.
+
+SPEC-rooms.md
+  Requirements and limits for room records and availability.
+
+SPEC-bookings.md
+  Requirements and limits for reservations and the stay lifecycle.
+
+SPEC-billing.md
+  Requirements and limits for generating and storing bills.
+
+tasks/plan.md
+  The development phases and checkpoints used to organize implementation.
+
+tasks/todo.md
+  The development task list and its completion/verification notes.
+
+.gitignore
+  Tells Git not to include generated Python cache files and the data folder in
+  version control. The database is excluded because it contains local hotel
+  and guest information, not because the app does not need it.
+
+__pycache__ folders and .pyc files
+  Automatically generated Python cache files. Python may create them while
+  running the app or tests. They are not source files and can be recreated.
+
+TECHNOLOGY AND WHY IT IS USED
+-----------------------------
+Python
+  The language used to write the application. Its standard library provides
+  the database, date, password-hashing, and desktop-interface tools used here.
+
+Tkinter
+  Python's desktop user-interface toolkit. It is used to display windows,
+  forms, buttons, tables, tabs, and messages without needing a web browser.
+
+SQLite
+  A small database stored in a file on this computer. It fits this project's
+  single-computer scope because it does not need a separate database server.
+
+unittest
+  Python's built-in automated testing framework. It checks the important
+  application rules without needing extra packages.
+
+The project uses these tools to keep the college-project setup simple: there
+are no third-party runtime packages or separate server to install. The
+trade-off is that the app is intended for local use, not multiple computers
+sharing data at the same time.
+
+HOW A USER ACTION TRAVELS THROUGH THE APP
+-----------------------------------------
+For example, when saving a reservation:
+
+1. The user enters or selects a guest, dates, and an available room in
+   hotel/booking_screen.py.
+2. The screen calls hotel/bookings.py with those selected values.
+3. The booking service validates the dates and checks that the guest and room
+   exist. It checks the database for overlapping active reservations.
+4. If the values are acceptable, the service saves the reservation using
+   hotel/database.py. The room's current nightly rate is copied into the
+   reservation so later rate changes do not alter that reservation's bill.
+5. The screen refreshes the reservation list and shows an error message if
+   validation or saving fails.
+
+This division keeps screen code focused on interaction, service code focused
+on hotel rules, and database code focused on saving and retrieving records.
+
+MAIN DATA AND RELATIONSHIPS
+---------------------------
+The database contains these main types of records:
+
+- users: the administrator username and password hash used for sign-in.
+- customers: guest names and contact details.
+- rooms: room numbers, room types, and nightly rates.
+- bookings: links one guest to one room for a date range, with a status and
+  saved nightly rate.
+- invoices: a saved bill linked to a checked-out booking, containing a
+  snapshot of the guest name, room number, dates, nights, rate, and total.
+
+A guest can have more than one booking over time. A room can have different
+bookings over time, but not overlapping active stays. A booking must refer to
+an existing guest and room. Historical bookings and invoices are retained;
+the app prevents deleting guests or rooms that have booking history.
+
+Reservation statuses are reserved, checked_in, checked_out, or cancelled.
+Normal status changes are: reserved -> checked_in -> checked_out, or
+reserved -> cancelled. Only a reserved booking can be edited or deleted.
+Cancelled and completed records remain as history.
+
+The stay uses check-in inclusive and check-out exclusive dates. This means a
+guest can check out on the same date that the next guest checks in. A booking
+stores its nightly rate at reservation time. A bill can be created only after
+checkout, and its room-charge total is the saved nightly rate multiplied by
+the number of booked nights.
+
+PASSWORDS, VALIDATION, AND RECORD SAFETY
+----------------------------------------
+The administrator password is not saved as readable text. The app stores a
+salted PBKDF2-HMAC-SHA256 password hash and checks the entered password during
+sign-in.
+
+The services validate important data before saving it: required guest and
+room fields, positive room rates, valid stay dates, existing guest/room
+records, and room availability. Database foreign keys and constraints provide
+additional protection for record relationships and values. Database queries
+use parameters rather than inserting user-entered text directly into SQL.
+
+The live database file and backups contain private guest information. Keep
+them in a secure location and limit access to people who need it. The
+dashboard's Back up data button makes a SQLite-safe copy while the app is
+open. Store backups separately from the computer when possible. To restore,
+close the app, keep a copy of the current database, then replace
+data/hotel.sqlite3 with the backup.
+
+HOW TO RUN AND CHECK THE PROJECT
+-------------------------------
+Requirements: Python 3.10 or newer and a working Tkinter installation. Open a
+terminal in the project folder and run:
+
+    python main.py
+
+On first launch, create an administrator account. On later launches, sign in
+with that account.
+
+To run the automated tests:
+
+    python -m unittest discover -s tests -v
+
+The tests use temporary databases, not the hotel's real database. They cover
+database setup, authentication, guest and room records, availability,
+reservation rules, billing, and database backup. The application also passed
+the project's full test suite (18 tests), Python compilation, and a dashboard
+window smoke test during preparation of this guide.
+
+NORMAL FRONT-DESK WORKFLOW
+--------------------------
+1. Add guest records in Guests.
+2. Add room records and nightly rates in Rooms.
+3. Choose a guest and dates, find an available room, and create a reservation.
+4. Select the reservation to record check-in and, later, checkout.
+5. After checkout, generate or retrieve the bill in Billing.
+6. Use Back up data in the dashboard to save a database backup somewhere
+   separate and secure.
+
+SHORT PRESENTATION SCRIPT
+-------------------------
+"My project is a small hotel front-desk application made with Python Tkinter
+and SQLite. The app starts from main.py, which prepares the database and opens
+the login and dashboard screens. The hotel folder is separated by
+responsibility: screen files display the interface, service files enforce
+hotel rules and save data, and database.py manages the database. For example,
+billing_screen.py is the billing page, billing.py creates and retrieves bills,
+and test_billing.py checks that billing behaves correctly. The tests are
+separate from normal app use and help verify the features. Guest and room
+records, reservations, and checked-out bills are stored locally in
+data/hotel.sqlite3."
+
+PROJECT SCOPE NOTE
+------------------
+This project is designed as a small, single-computer college/demo application.
+It is not a multi-workstation commercial hotel system. It does not process
+payments, calculate taxes, or guarantee compliance with local legal invoice
+requirements.
